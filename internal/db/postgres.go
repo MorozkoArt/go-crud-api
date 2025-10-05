@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/MorozkoArt/go-crud-api/internal/config"
 )
 
-func NewPostgreDB(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
+func NewPostgresDB(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
 		cfg.Database.User,

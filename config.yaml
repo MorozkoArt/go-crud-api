@@ -4,7 +4,7 @@ server:
 database:
   host: localhost
   port: 5432
-  user: postgres
+  user: app_user
   password: 1710058327
   name: go_api
   sslmode: disable
