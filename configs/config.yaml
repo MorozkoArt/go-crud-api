@@ -1,5 +1,0 @@
-server:
-  port: "8080"
-
-database:
-  url: "postgres://postgres:1710058327@localhost:5432/go_api?sslmode=disable"
