@@ -21,16 +21,14 @@ func (r *Repository) Create(ctx context.Context, u *User) error {
 }
 
 func (r *Repository) GetAll(ctx context.Context) ([]User, error) {
-	rows, err := r.db.Query(ctx, "Select id, name, email, FROM users ORDER BY id")
+	rows, err := r.db.Query(ctx, "SELECT id, name, email FROM users ORDER BY id")
 
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	var users []User
-
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.Id, &u.Name, &u.Email); err != nil {
@@ -62,6 +60,6 @@ func (r *Repository) Update(ctx context.Context, u *User) error {
 }
 
 func (r *Repository) Delete(ctx context.Context, id int64) error {
-	_, err := r.db.Exec(ctx, "DELENE FROM users WHERE id=$1", id)
+	_, err := r.db.Exec(ctx, "DELETE FROM users WHERE id=$1", id)
 	return err
 }
