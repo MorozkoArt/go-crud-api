@@ -40,5 +40,16 @@ func (r *Repository) GetAll(ctx context.Context) ([]User, error) {
 	}
 
 	return users, nil
+}
 
+func (r *Repository) GetById(ctx context.Context, id int64) (*User, error) {
+	var u User
+	err := r.db.QueryRow(ctx,
+		"SELECT id, name, email FROM users WHERE id=$1", id).
+		Scan(&u.Id, &u.Name, &u.Email)
+	
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
 }
