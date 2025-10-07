@@ -25,3 +25,17 @@ func (h *Handler) RegisterRouter(r chi.Router) {
 	r.Delete("/{id}", h.DeleteUser)
 }
 
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var u user.User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := h.repo.Create(r.Context(), &u); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+
