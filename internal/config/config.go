@@ -1,13 +1,15 @@
 package config
 
 import (
-	_ "log"
+	"time"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	Server ServerConfig
 	Database DatabaseConfig
+	Auth     AuthConfig
 }
 
 type ServerConfig struct {
@@ -23,10 +25,17 @@ type DatabaseConfig struct {
 	SSLMode string
 }
 
+type AuthConfig struct {
+    JWTSecret    string
+    TokenExpiry  time.Duration
+}
+
 func LoadConfig() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+
+	viper.SetDefault("auth.token_expiry", "24h")
 	
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
