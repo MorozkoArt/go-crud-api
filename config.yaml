@@ -8,3 +8,7 @@ database:
   password: 1710058327
   name: go_api
   sslmode: disable
+
+auth:
+  jwt_secret: "kegnezruQWBcDpdPusWiWVywUssUwpr5CmjzZ6NkWUU="
+  token_expiry: 24h
