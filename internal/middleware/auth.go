@@ -12,7 +12,6 @@ type userKey string
 
 const (
     UserIDKey    userKey = "user_id"
-    UserEmailKey userKey = "user_email"
 )
 
 func AuthMiddleware(jwtAuth *auth.JWTService) func(http.Handler) http.Handler {
@@ -40,19 +39,8 @@ func AuthMiddleware(jwtAuth *auth.JWTService) func(http.Handler) http.Handler {
             
             ctx := r.Context()
             ctx = context.WithValue(ctx, UserIDKey, claims.UserID)
-            ctx = context.WithValue(ctx, UserEmailKey, claims.Email)
             
             next.ServeHTTP(w, r.WithContext(ctx))
         })
     }
-}
-
-func GetUserID(ctx context.Context) (int64, bool) {
-    userID, ok := ctx.Value(UserIDKey).(int64)
-    return userID, ok
-}
-
-func GetUserEmail(ctx context.Context) (string, bool) {
-    email, ok := ctx.Value(UserEmailKey).(string)
-    return email, ok
 }
