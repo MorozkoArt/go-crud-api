@@ -1,41 +1,48 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"net/http"
+    "context"
+    "fmt"
+    "log"
+    "net/http"
 
-	"github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5"
 
-	"github.com/MorozkoArt/go-crud-api/internal/config"
-	"github.com/MorozkoArt/go-crud-api/internal/db"
-	"github.com/MorozkoArt/go-crud-api/internal/user"
-	"github.com/MorozkoArt/go-crud-api/internal/router"
+    "github.com/MorozkoArt/go-crud-api/internal/config"
+    "github.com/MorozkoArt/go-crud-api/internal/db"
+    "github.com/MorozkoArt/go-crud-api/internal/user"
+    "github.com/MorozkoArt/go-crud-api/internal/router"
+    "github.com/MorozkoArt/go-crud-api/internal/auth"
+    "github.com/MorozkoArt/go-crud-api/internal/middleware"
 )
 
 func main() {
-	ctx := context.Background()
+    ctx := context.Background()
 
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("Configuration loading error: %v", err)
-	}
+    cfg, err := config.LoadConfig()
+    if err != nil {
+        log.Fatalf("Configuration loading error: %v", err)
+    }
 
-	pool, err := db.NewPostgresDB(ctx, cfg)
-	if err != nil {
-		log.Fatalf("Error connecting to the database: %v", err)
-	}
-	defer pool.Close()
+    pool, err := db.NewPostgresDB(ctx, cfg)
+    if err != nil {
+        log.Fatalf("Error connecting to the database: %v", err)
+    }
+    defer pool.Close()
 
-	repo := user.NewRepository(pool)
-	handler := router.NewHandler(repo)
+    jwtService := auth.NewJWTService(cfg.Auth.JWTSecret, cfg.Auth.TokenExpiry)
 
-	r := chi.NewRouter()
-	r.Route("/users", handler.RegisterRouter)
+    repo := user.NewRepository(pool)
+    handler := router.NewHandler(repo, jwtService)
 
-	addr := fmt.Sprintf(":%d", cfg.Server.Port)
-	fmt.Printf("Сервер запущен на %s\n", addr)
-	http.ListenAndServe(addr, r)
+    r := chi.NewRouter()
+    
+    r.Use(middleware.Logger)
+    
+    r.Route("/api/users", handler.RegisterRouter)
 
+    addr := fmt.Sprintf(":%d", cfg.Server.Port)
+    fmt.Printf("Server started on %s\n", addr)
+    
+    log.Fatal(http.ListenAndServe(addr, r))
 }
