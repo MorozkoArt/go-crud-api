@@ -53,10 +53,10 @@ func (r *Repository) GetById(ctx context.Context, id int64) (*User, error) {
 }
 
 func (r *Repository) Update(ctx context.Context, u *User) error {
-	_, err := r.db.Exec(ctx, 
-		"UPDATE users SET name=$1, email=$2, id=$3",
-		u.Name, u.Email, u.Id)
-	return err
+    _, err := r.db.Exec(ctx, 
+        "UPDATE users SET name=$1, email=$2 WHERE id=$3",
+        u.Name, u.Email, u.Id)
+    return err
 }
 
 func (r *Repository) Delete(ctx context.Context, id int64) error {

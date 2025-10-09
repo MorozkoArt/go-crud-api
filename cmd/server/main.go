@@ -4,10 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/MorozkoArt/go-crud-api/internal/config"
 	"github.com/MorozkoArt/go-crud-api/internal/db"
 	"github.com/MorozkoArt/go-crud-api/internal/user"
+	"github.com/MorozkoArt/go-crud-api/internal/router"
 )
 
 func main() {
@@ -25,25 +29,13 @@ func main() {
 	defer pool.Close()
 
 	repo := user.NewRepository(pool)
+	handler := router.NewHandler(repo)
 
-	// testUser := &user.User{
-	// 	Name: 	  "Alex",
-	// 	Email: 	  "alex@gmail.com",
-	// 	Password: "123456",
-	// }
+	r := chi.NewRouter()
+	r.Route("/users", handler.RegisterRouter)
 
-	// if err := repo.Create(ctx, testUser); err != nil {
-	// 	log.Println("Error creating user")
-	// } else {
-	// 	fmt.Println("User added!")
-	// }
-
-	users, _ := repo.GetAll(ctx)
-	fmt.Println("Users in the database:", users)
-
-	repo.Delete(ctx, 1)
-
-	users, _ = repo.GetAll(ctx)
-	fmt.Println("Users in the database:", users)
+	addr := fmt.Sprintf(":%d", cfg.Server.Port)
+	fmt.Printf("Сервер запущен на %s\n", addr)
+	http.ListenAndServe(addr, r)
 
 }
