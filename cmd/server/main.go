@@ -10,8 +10,8 @@ import (
 
     "github.com/MorozkoArt/go-crud-api/internal/config"
     "github.com/MorozkoArt/go-crud-api/internal/db"
-    "github.com/MorozkoArt/go-crud-api/internal/user"
-    "github.com/MorozkoArt/go-crud-api/internal/router"
+    "github.com/MorozkoArt/go-crud-api/internal/repository"
+    "github.com/MorozkoArt/go-crud-api/internal/handlers"
     "github.com/MorozkoArt/go-crud-api/internal/auth"
     "github.com/MorozkoArt/go-crud-api/internal/middleware"
 )
@@ -32,8 +32,8 @@ func main() {
 
     jwtService := auth.NewJWTService(cfg.Auth.JWTSecret, cfg.Auth.TokenExpiry)
 
-    repo := user.NewRepository(pool)
-    handler := router.NewHandler(repo, jwtService)
+    repo := repository.NewRepository(pool)
+    handler := handlers.NewHandler(repo, jwtService)
 
     r := chi.NewRouter()
     

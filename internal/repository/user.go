@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
     "context"
@@ -7,6 +7,7 @@ import (
 
     "github.com/jackc/pgx/v5/pgxpool"
     "github.com/MorozkoArt/go-crud-api/internal/auth"
+    "github.com/MorozkoArt/go-crud-api/internal/models"
 )
 
 var (
@@ -22,7 +23,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
     return &Repository{db: db}
 }
 
-func (r *Repository) Create(ctx context.Context, u *User) error {
+func (r *Repository) Create(ctx context.Context, u *models.User) error {
     var exists bool
     err := r.db.QueryRow(ctx, 
         "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", u.Email).
@@ -45,8 +46,8 @@ func (r *Repository) Create(ctx context.Context, u *User) error {
     return err
 }
 
-func (r *Repository) GetByEmail(ctx context.Context, email string) (*User, error) {
-    var u User
+func (r *Repository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+    var u models.User
     err := r.db.QueryRow(ctx,
         "SELECT id, name, email, password FROM users WHERE email=$1", email).
         Scan(&u.Id, &u.Name, &u.Email, &u.Password)
@@ -57,7 +58,7 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (*User, error
     return &u, err
 }
 
-func (r *Repository) VerifyPassword(ctx context.Context, email, password string) (*User, error) {
+func (r *Repository) VerifyPassword(ctx context.Context, email, password string) (*models.User, error) {
     user, err := r.GetByEmail(ctx, email)
     if err != nil {
         return nil, err
@@ -71,8 +72,8 @@ func (r *Repository) VerifyPassword(ctx context.Context, email, password string)
     return user, nil
 }
 
-func (r *Repository) GetById(ctx context.Context, id int64) (*User, error) {
-    var u User
+func (r *Repository) GetById(ctx context.Context, id int64) (*models.User, error) {
+    var u models.User
     err := r.db.QueryRow(ctx,
         "SELECT id, name, email FROM users WHERE id=$1", id).
         Scan(&u.Id, &u.Name, &u.Email)
@@ -83,16 +84,16 @@ func (r *Repository) GetById(ctx context.Context, id int64) (*User, error) {
     return &u, err
 }
 
-func (r *Repository) GetAll(ctx context.Context) ([]User, error) {
+func (r *Repository) GetAll(ctx context.Context) ([]models.User, error) {
     rows, err := r.db.Query(ctx, "SELECT id, name, email FROM users ORDER BY id")
     if err != nil {
         return nil, err
     }
     defer rows.Close()
 
-    var users []User
+    var users []models.User
     for rows.Next() {
-        var u User
+        var u models.User
         if err := rows.Scan(&u.Id, &u.Name, &u.Email); err != nil {
             return nil, err
         }
@@ -102,7 +103,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]User, error) {
     return users, nil
 }
 
-func (r *Repository) Update(ctx context.Context, u *User) error {
+func (r *Repository) Update(ctx context.Context, u *models.User) error {
     result, err := r.db.Exec(ctx, 
         "UPDATE users SET name=$1, email=$2 WHERE id=$3",
         u.Name, u.Email, u.Id)

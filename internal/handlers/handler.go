@@ -1,4 +1,4 @@
-package router
+package handlers
 
 import (
     "encoding/json"
@@ -6,17 +6,18 @@ import (
     "strconv"
 
     "github.com/go-chi/chi/v5"
-    "github.com/MorozkoArt/go-crud-api/internal/user"
+    "github.com/MorozkoArt/go-crud-api/internal/repository"
+    "github.com/MorozkoArt/go-crud-api/internal/models"
     "github.com/MorozkoArt/go-crud-api/internal/auth"
     "github.com/MorozkoArt/go-crud-api/internal/middleware"
 )
 
 type Handler struct {
-    repo      *user.Repository
+    repo      *repository.Repository
     jwtAuth   *auth.JWTService
 }
 
-func NewHandler(repo *user.Repository, jwtAuth *auth.JWTService) *Handler {
+func NewHandler(repo *repository.Repository, jwtAuth *auth.JWTService) *Handler {
     return &Handler{
         repo:    repo,
         jwtAuth: jwtAuth,
@@ -49,14 +50,14 @@ func (h *Handler) RegisterRouter(r chi.Router) {
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-    var u user.User
+    var u models.User
     if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
         sendError(w, err.Error(), http.StatusBadRequest)
         return
     }
 
     if err := h.repo.Create(r.Context(), &u); err != nil {
-        if err == user.ErrUserExists {
+        if err == repository.ErrUserExists {
             sendError(w, "User with this email already exists", http.StatusConflict)
         } else {
             sendError(w, err.Error(), http.StatusInternalServerError)
@@ -116,7 +117,7 @@ func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
     u, err := h.repo.GetById(r.Context(), id)
     if err != nil {
-        if err == user.ErrUserNotFound {
+        if err == repository.ErrUserNotFound {
             sendError(w, "User not found", http.StatusNotFound)
         } else {
             sendError(w, err.Error(), http.StatusInternalServerError)
@@ -134,7 +135,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var u user.User
+    var u models.User
     if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
         sendError(w, err.Error(), http.StatusBadRequest)
         return
@@ -142,7 +143,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
     u.Id = id
     if err := h.repo.Update(r.Context(), &u); err != nil {
-        if err == user.ErrUserNotFound {
+        if err == repository.ErrUserNotFound {
             sendError(w, "User not found", http.StatusNotFound)
         } else {
             sendError(w, err.Error(), http.StatusInternalServerError)
@@ -161,7 +162,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
     }
 
     if err := h.repo.Delete(r.Context(), id); err != nil {
-        if err == user.ErrUserNotFound {
+        if err == repository.ErrUserNotFound {
             sendError(w, "User not found", http.StatusNotFound)
         } else {
             sendError(w, err.Error(), http.StatusInternalServerError)
