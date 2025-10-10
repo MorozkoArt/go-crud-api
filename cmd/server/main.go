@@ -6,14 +6,12 @@ import (
     "log"
     "net/http"
 
-    "github.com/go-chi/chi/v5"
-
     "github.com/MorozkoArt/go-crud-api/internal/config"
     "github.com/MorozkoArt/go-crud-api/internal/db"
-    "github.com/MorozkoArt/go-crud-api/internal/repository"
     "github.com/MorozkoArt/go-crud-api/internal/handlers"
-    "github.com/MorozkoArt/go-crud-api/internal/auth"
-    "github.com/MorozkoArt/go-crud-api/internal/middleware"
+    "github.com/MorozkoArt/go-crud-api/internal/repository"
+    "github.com/MorozkoArt/go-crud-api/internal/services"
+    "github.com/MorozkoArt/go-crud-api/internal/router"
 )
 
 func main() {
@@ -30,19 +28,17 @@ func main() {
     }
     defer pool.Close()
 
-    jwtService := auth.NewJWTService(cfg.Auth.JWTSecret, cfg.Auth.TokenExpiry)
+    userRepo := repository.NewUserRepository(pool)
+    authService := services.NewAuthService(cfg.Auth.JWTSecret, cfg.Auth.TokenExpiry)
+    userService := services.NewUserService(userRepo, authService)
+    userHandler := handlers.NewUserHandler(userService)
 
-    repo := repository.NewRepository(pool)
-    handler := handlers.NewHandler(repo, jwtService)
-
-    r := chi.NewRouter()
-    
-    r.Use(middleware.Logger)
-    
-    r.Route("/api/users", handler.RegisterRouter)
+    r := router.NewRouter(userHandler, authService)
 
     addr := fmt.Sprintf(":%d", cfg.Server.Port)
-    fmt.Printf("Server started on %s\n", addr)
+    log.Printf("Server starting on %s", addr)
     
-    log.Fatal(http.ListenAndServe(addr, r))
+    if err := http.ListenAndServe(addr, r); err != nil {
+        log.Fatalf("Server failed to start: %v", err)
+    }
 }
