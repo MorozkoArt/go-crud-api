@@ -5,16 +5,16 @@ import (
     "net/http"
     "strings"
 
-    "github.com/MorozkoArt/go-crud-api/internal/auth"
+    "github.com/MorozkoArt/go-crud-api/internal/services"
 )
 
 type userKey string
 
 const (
-    UserIDKey    userKey = "user_id"
+    UserIDKey userKey = "user_id"
 )
 
-func AuthMiddleware(jwtAuth *auth.JWTService) func(http.Handler) http.Handler {
+func AuthMiddleware(authService services.AuthService) func(http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             authHeader := r.Header.Get("Authorization")
@@ -31,7 +31,7 @@ func AuthMiddleware(jwtAuth *auth.JWTService) func(http.Handler) http.Handler {
             
             tokenString := parts[1]
             
-            claims, err := jwtAuth.ValidateToken(tokenString)
+            claims, err := authService.ValidateToken(tokenString)
             if err != nil {
                 http.Error(w, `{"success": false, "error": "Invalid or expired token"}`, http.StatusUnauthorized)
                 return
