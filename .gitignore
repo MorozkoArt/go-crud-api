@@ -13,5 +13,6 @@
 
 # Config
 .env
+config.yaml
 
 draft.md
