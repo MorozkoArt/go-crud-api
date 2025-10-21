@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -8,9 +6,11 @@ services:
     ports:
       - "8080:8080"
     container_name: go-api-app
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgresql://app_user:${POSTGRES_PASSWORD}@postgres:5432/go_api?sslmode=disable
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     restart: on-failure
 
   postgres:
@@ -18,7 +18,7 @@ services:
     container_name: go-api-db
     environment:
       POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: 1710058327
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: go_api
     ports:
       - "5432:5432"
