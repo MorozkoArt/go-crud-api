@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    container_name: go-api-app
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgresql://app_user:${POSTGRES_PASSWORD}@postgres:5432/go_api?sslmode=disable
+    depends_on:
+      - postgres
+    restart: on-failure
+
+  postgres:
+    image: postgres:15
+    container_name: go-api-db
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: go_api
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d go_api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+database:
+  host: postgres
+  port: 5432
+  user: app_user
+  password: your_password_here
+  name: go_api
+  sslmode: disable
+
+auth:
+  jwt_secret: "your_jwt_secret_key_here"
+  token_expiry: 24h
