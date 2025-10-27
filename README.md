@@ -50,3 +50,14 @@ go run cmd/generate-jwt/main.go
 ```bash
 docker-compose up --build
 ```
+
+### Применение миграции:
+
+```bash
+docker exec go-api-app goose -dir internal/db/migrations up
+
+# или через две команды
+
+docker exec -it go-api-app sh
+goose -dir internal/db/migrations up
+```

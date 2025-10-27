@@ -24,6 +24,8 @@ type DatabaseConfig struct {
     SSLMode  string `mapstructure:"sslmode"`
 }
 
+
+
 type AuthConfig struct {
     JWTSecret   string        `mapstructure:"jwt_secret"`
     TokenExpiry time.Duration `mapstructure:"token_expiry"`
